@@ -1,0 +1,7 @@
+services:
+  petworld.presentation:
+    build:
+      context: .
+      dockerfile: PetWorld.Presentation/Dockerfile
+    ports:
+      - "5000:5000"   

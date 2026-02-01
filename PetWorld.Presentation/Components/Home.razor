@@ -1,0 +1,81 @@
+﻿@page "/"
+@inject IChatService ChatService
+
+<PageTitle>Chat - PetWorld</PageTitle>
+
+<div class="chat-container">
+    <h2>💬 Zadaj pytanie o nasze produkty</h2>
+
+    <div class="chat-input-section">
+        <textarea class="chat-input"
+                  @bind="question"
+                  placeholder="Wpisz swoje pytanie, np. 'Jaka karma będzie najlepsza dla mojego psa?'"
+                  rows="4"
+                  disabled="@isProcessing">
+        </textarea>
+
+        <button class="btn btn-primary"
+                @onclick="SendQuestion"
+                disabled="@(isProcessing || string.IsNullOrWhiteSpace(question))">
+            @if (isProcessing)
+            {
+                <span>⏳ Przetwarzam...</span>
+            }
+            else
+            {
+                <span>📤 Wyślij</span>
+            }
+        </button>
+    </div>
+
+    @if (errorMessage != null)
+    {
+        <div class="alert alert-error">
+            <strong>Błąd:</strong> @errorMessage
+        </div>
+    }
+
+    @if (response != null)
+    {
+        <div class="response-container">
+            <div class="response-header">
+                <h3>✅ Odpowiedź</h3>
+                <span class="iteration-badge">Iteracji: @response.IterationCount</span>
+            </div>
+            <div class="response-content">
+                @response.Answer
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string question = string.Empty;
+    private PetWorld.Application.DTOs.ChatResponseDto? response;
+    private bool isProcessing = false;
+    private string? errorMessage;
+
+    private async Task SendQuestion()
+    {
+        if (string.IsNullOrWhiteSpace(question))
+            return;
+
+        isProcessing = true;
+        errorMessage = null;
+        response = null;
+
+        try
+        {
+            response = await ChatService.ProcessQuestionAsync(question);
+            question = string.Empty; // Clear input after successful send
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Wystąpił błąd podczas przetwarzania pytania: {ex.Message}";
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+}
