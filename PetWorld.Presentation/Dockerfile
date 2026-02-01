@@ -4,8 +4,8 @@
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 5000
-ENV ASPNETCORE_URLS=http://+:5000
+EXPOSE 8080
+EXPOSE 8081
 
 
 # This stage is used to build the service project
@@ -30,4 +30,5 @@ RUN dotnet publish "./PetWorld.Presentation.csproj" -c $BUILD_CONFIGURATION -o /
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+ENV ASPNETCORE_URLS=http://+:80
 ENTRYPOINT ["dotnet", "PetWorld.Presentation.dll"]
